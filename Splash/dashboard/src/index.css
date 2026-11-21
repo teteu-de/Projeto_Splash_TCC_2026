@@ -1,0 +1,287 @@
+@import "tailwindcss";
+
+/* ============================================================================
+ * 🎨 SPLASH DESIGN SYSTEM - CSS & IDENTIDADE VISUAL
+ * ============================================================================
+ * Cores Primárias da Marca:
+ * - Azul Profundo / Marinho: #015486
+ * - Azul Ciano / Interativo:  #2ba6e2 (Dark) / #0284c7 (Light)
+ * - Azul Céu / Destaques:    #99d6ee
+ * - Verde Economia:          #10b981 / #34d399
+ * - Vermelho Alerta / Vazão: #ef4444 / #f87171
+ * ============================================================================
+ */
+
+/* ----------------------------------------------------------------------------
+ * 1. FONTES TIPOGRÁFICAS OFICIAIS (Calibre & Poppins)
+ * ----------------------------------------------------------------------------
+ */
+@font-face {
+  font-family: 'Calibre';
+  src: local('Calibre'), local('Calibri'), local('Carlito');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Calibre';
+  src: local('Calibre-Bold'), local('Calibri-Bold'), local('Calibri Bold'), local('Carlito-Bold'), local('Carlito Bold');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@theme {
+  --font-poppins: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-calibre: 'Calibre', 'Calibri', 'Carlito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Poppins', 'Calibre', 'Calibri', 'Carlito', sans-serif;
+}
+
+:root {
+  font-family: 'Poppins', 'Calibre', 'Calibri', 'Carlito', sans-serif;
+}
+
+body {
+  font-family: 'Calibre', 'Calibri', 'Carlito', 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Títulos, Cabeçalhos e Botões de Ação utilizam Poppins */
+h1, h2, h3, h4, h5, h6,
+button,
+nav,
+.font-poppins,
+.font-heading {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Parágrafos, descrições, labels e formulários utilizam Calibre / Calibri */
+p,
+span,
+label,
+input,
+select,
+textarea,
+table,
+.font-calibre,
+.font-calibri {
+  font-family: 'Calibre', 'Calibri', 'Carlito', 'Poppins', sans-serif;
+}
+
+/* Classes utilitárias explícitas para garantir fontes específicas */
+.poppins-title {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.calibre-text {
+  font-family: 'Calibre', 'Calibri', 'Carlito', sans-serif !important;
+}
+
+/* ----------------------------------------------------------------------------
+ * 2. BARRA DE ROLAGEM CUSTOMIZADA (Custom Scrollbar)
+ * ----------------------------------------------------------------------------
+ */
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #52525b;
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #0284c7;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * 3. REGRAS DE DESIGN ERGONÔMICO PARA O MODO CLARO (BRANCO & OFF-WHITE)
+ * ----------------------------------------------------------------------------
+ * - Fundo principal Off-White confortável (#f8fafc) para evitar brilho excessivo
+ * - Cartões com superfície branca pura (#ffffff) e bordas suaves (#e2e8f0)
+ * - Tipografia de alto contraste para leitura rápida dos litros e valores
+ */
+html.light {
+  color-scheme: light;
+}
+
+html.light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Header em modo claro */
+html.light header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light header button {
+  color: #334155 !important;
+}
+
+html.light header button:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Barra de navegação inferior (BottomNav) em modo claro */
+html.light nav {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light nav button {
+  color: #64748b !important;
+}
+
+html.light nav button:hover {
+  color: #0f172a !important;
+}
+
+html.light nav button.bg-\[\#015486\]\/30 {
+  color: #015486 !important;
+  background-color: rgba(1, 84, 134, 0.12) !important;
+}
+
+/* Superfícies e Cards em modo claro */
+html.light .bg-\[\#202024\],
+html.light .bg-\[\#242424\],
+html.light .bg-\[\#1e1e22\],
+html.light .bg-\[\#1c1c20\],
+html.light .bg-\[\#1a1a1c\],
+html.light .bg-\[\#222228\],
+html.light .bg-zinc-900,
+html.light .bg-zinc-900\/90,
+html.light .bg-zinc-900\/80,
+html.light .bg-zinc-900\/70,
+html.light .bg-zinc-900\/60 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .bg-zinc-800,
+html.light .bg-zinc-800\/60,
+html.light .bg-zinc-800\/50,
+html.light .bg-zinc-800\/40,
+html.light .bg-\[\#141416\],
+html.light .bg-\[\#181818\] {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light .border-zinc-800,
+html.light .border-zinc-800\/80,
+html.light .border-zinc-800\/60,
+html.light .border-zinc-700,
+html.light .border-zinc-700\/80 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Tipografia de alto contraste confortável (WCAG AA) */
+html.light .text-white {
+  color: #0f172a !important;
+}
+
+html.light .text-zinc-100 {
+  color: #0f172a !important;
+}
+
+html.light .text-zinc-200,
+html.light .text-zinc-300 {
+  color: #334155 !important;
+}
+
+html.light .text-zinc-400 {
+  color: #475569 !important;
+}
+
+html.light .text-zinc-500 {
+  color: #64748b !important;
+}
+
+/* Cores de acento e links em modo claro */
+html.light .text-\[\#2ba6e2\] {
+  color: #0284c7 !important;
+}
+
+html.light .text-\[\#99d6ee\] {
+  color: #0369a1 !important;
+}
+
+/* Preserva o card Hero em gradiente azul rico com textos brancos legíveis */
+html.light .bg-gradient-to-br.from-\[\#015486\] {
+  background: linear-gradient(135deg, #015486 0%, #0369a1 60%, #0284c7 100%) !important;
+  box-shadow: 0 10px 25px -5px rgba(1, 84, 134, 0.25) !important;
+}
+
+html.light .bg-gradient-to-br.from-\[\#015486\] * {
+  color: #ffffff !important;
+}
+
+html.light .bg-gradient-to-br.from-\[\#015486\] .text-\[\#99d6ee\] {
+  color: #e0f2fe !important;
+}
+
+html.light .bg-gradient-to-br.from-\[\#015486\] .text-emerald-400 {
+  color: #6ee7b7 !important;
+}
+
+/* Formulários em modo claro */
+html.light input:not([type="checkbox"]):not([type="range"]),
+html.light select,
+html.light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input:focus,
+html.light select:focus {
+  border-color: #0284c7 !important;
+  outline: 2px solid rgba(2, 132, 199, 0.2) !important;
+}
+
+/* Menu Lateral (SidebarDrawer) em modo claro */
+html.light .w-80.bg-\[\#181818\] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light .w-80.bg-\[\#181818\] .text-zinc-300 {
+  color: #334155 !important;
+}
+
+html.light .w-80.bg-\[\#181818\] .text-zinc-500 {
+  color: #64748b !important;
+}
+
+html.light .w-80.bg-\[\#181818\] button:hover {
+  background-color: #f1f5f9 !important;
+}
+
+html.light .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+/* Corrige o fundo geral e as cores do modo claro */
+html.light,
+html.light body,
+html.light #root {
+  background-color: #f8fafc !important;
+  color: #0f172a;
+}
+
+/* Mantém o fundo claro nos contêineres principais */
+html.light main {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
