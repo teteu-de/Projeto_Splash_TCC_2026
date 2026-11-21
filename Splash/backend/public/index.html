@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Splash - Monitoramento de Água</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>SPLASH</h1>
+        <p>Monitoramento de consumo de água</p>
+    </header>
+
+    <main>
+
+        <section class="cards">
+
+            <div class="card">
+                <h2>Consumo</h2>
+                <p id="consumo">-- L</p>
+            </div>
+
+            <div class="card">
+                <h2>Vazão</h2>
+                <p id="vazao">-- L/min</p>
+            </div>
+
+            <div class="card">
+                <h2>Custo</h2>
+                <p id="custo">R$ --</p>
+            </div>
+
+        </section>
+<section class="historico">
+
+    <h2>Histórico de consumo</h2>
+
+    <!-- Seletor para escolher o período do histórico -->
+    <select id="periodoHistorico">
+
+        <!-- Mostra os dados do dia atual -->
+        <option value="hoje">Hoje</option>
+
+        <!-- Mostra os dados dos últimos 7 dias -->
+        <option value="7dias">Últimos 7 dias</option>
+
+        <!-- Mostra os dados do mês atual -->
+        <option value="mes">Este mês</option>
+
+    </select>
+
+    <!-- Área onde o gráfico será exibido -->
+    <canvas id="graficoConsumo"></canvas>
+
+</section>
+
+    </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,476 @@
+
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
+
+// =====================================================
+// CONFIGURAÇÃO DO WI-FI
+// =====================================================
+
+const char* ssid = "Nome_rede";
+const char* password = "Senha";
+
+
+// =====================================================
+// ENDEREÇO DA API
+// =====================================================
+
+const char* servidor = "http://ip:3000/api/consumo";//Altere e coloque seu ip
+
+
+// =====================================================
+// CONFIGURAÇÃO DO SENSOR
+// =====================================================
+
+#define SENSOR_PIN 4
+
+
+// =====================================================
+// CONTADORES DE PULSOS
+// =====================================================
+
+// Conta os pulsos ocorridos no último segundo
+volatile unsigned long pulsosSegundo = 0;
+
+// Conta todos os pulsos desde que o ESP32 foi ligado
+volatile unsigned long pulsosTotais = 0;
+
+
+// =====================================================
+// CONTROLE DE TEMPO
+// =====================================================
+
+// Controla a leitura do sensor
+unsigned long ultimoTempo = 0;
+
+// Controla o último envio para a API
+unsigned long ultimoEnvio = 0;
+
+// Conta os pulsos que aconteceram desde o último envio
+unsigned long pulsosDesdeUltimoEnvio = 0;
+
+
+// =====================================================
+// INTERVALOS
+// =====================================================
+
+// Leitura do sensor: 1 segundo
+const unsigned long intervaloLeitura = 1000;
+
+// Envio para a API: 30 segundos
+const unsigned long intervaloEnvio = 30000;
+
+
+// =====================================================
+// VARIÁVEIS DE CONSUMO
+// =====================================================
+
+float vazao = 0;
+
+float litrosConsumidos = 0;
+
+
+// =====================================================
+// CALIBRAÇÃO DO SENSOR
+// =====================================================
+
+// Quantidade de pulsos necessária para aproximadamente 1 litro
+const float pulsosLitros = 289.5;
+
+
+// =====================================================
+// INTERRUPÇÃO DO SENSOR
+// =====================================================
+
+void IRAM_ATTR contarPulso() {
+
+  // Incrementa os pulsos do segundo atual
+  pulsosSegundo++;
+
+  // Incrementa o contador total
+  pulsosTotais++;
+}
+
+
+// =====================================================
+// CONFIGURAÇÃO INICIAL
+// =====================================================
+
+void setup() {
+
+  // Inicializa o Monitor Serial
+  Serial.begin(115200);
+
+
+  // ---------------------------------------------------
+  // CONFIGURAÇÃO DO PINO DO SENSOR
+  // ---------------------------------------------------
+
+  pinMode(SENSOR_PIN, INPUT_PULLUP);
+
+
+  // ---------------------------------------------------
+  // CONFIGURAÇÃO DA INTERRUPÇÃO
+  // ---------------------------------------------------
+
+  attachInterrupt(
+    digitalPinToInterrupt(SENSOR_PIN),
+    contarPulso,
+    FALLING
+  );
+
+
+  // ---------------------------------------------------
+  // MENSAGEM DE INICIALIZAÇÃO
+  // ---------------------------------------------------
+
+  Serial.println();
+  Serial.println("==============================");
+  Serial.println("       SPLASH - INICIANDO");
+  Serial.println("==============================");
+
+
+  // ---------------------------------------------------
+  // CONEXÃO COM O WI-FI
+  // ---------------------------------------------------
+
+  Serial.println("Conectando ao Wi-Fi...");
+
+  WiFi.begin(ssid, password);
+
+
+  while (WiFi.status() != WL_CONNECTED) {
+
+    delay(500);
+
+    Serial.print(".");
+  }
+
+
+  // ---------------------------------------------------
+  // WI-FI CONECTADO
+  // ---------------------------------------------------
+
+  Serial.println();
+
+  Serial.println("WiFi conectado!");
+
+  Serial.print("IP do ESP32: ");
+
+  Serial.println(WiFi.localIP());
+
+
+  // ---------------------------------------------------
+  // INICIALIZA OS CONTROLES DE TEMPO
+  // ---------------------------------------------------
+
+  ultimoTempo = millis();
+
+  ultimoEnvio = millis();
+
+
+  Serial.println();
+
+  Serial.println("Sistema pronto.");
+
+  Serial.println("==============================");
+}
+
+
+// =====================================================
+// LOOP PRINCIPAL
+// =====================================================
+
+void loop() {
+
+
+  // ===================================================
+  // LEITURA DO SENSOR A CADA 1 SEGUNDO
+  // ===================================================
+
+  if (millis() - ultimoTempo >= intervaloLeitura) {
+
+
+    // -------------------------------------------------
+    // COPIA OS PULSOS COM SEGURANÇA
+    // -------------------------------------------------
+
+    noInterrupts();
+
+    unsigned long pulsos = pulsosSegundo;
+
+    // Zera os pulsos do segundo atual
+    pulsosSegundo = 0;
+
+    interrupts();
+
+
+    // -------------------------------------------------
+    // GUARDA OS NOVOS PULSOS
+    // -------------------------------------------------
+
+    // Soma os pulsos deste segundo aos pulsos
+    // que ainda não foram enviados para a API.
+    pulsosDesdeUltimoEnvio += pulsos;
+
+
+    // -------------------------------------------------
+    // CÁLCULO DA VAZÃO
+    // -------------------------------------------------
+
+    // Fórmula utilizada pelo sensor:
+    //
+    // Vazão = pulsos por segundo / 7.5
+    //
+    // Resultado em litros por minuto.
+
+    vazao = pulsos / 7.5;
+
+
+    // -------------------------------------------------
+    // CÁLCULO DO CONSUMO TOTAL
+    // -------------------------------------------------
+
+    // Converte os pulsos acumulados em litros.
+
+    litrosConsumidos =
+      pulsosTotais / pulsosLitros;
+
+
+    // =================================================
+    // MOSTRA OS DADOS NO MONITOR SERIAL
+    // =================================================
+
+    Serial.println();
+
+    Serial.println("===== DADOS DO SENSOR =====");
+
+
+    // Pulsos do último segundo
+    Serial.print("Pulsos: ");
+
+    Serial.println(pulsos);
+
+
+    // Vazão atual
+    Serial.print("Vazao: ");
+
+    Serial.print(vazao);
+
+    Serial.println(" L/min");
+
+
+    // Consumo acumulado
+    Serial.print("Consumo Total: ");
+
+    Serial.print(litrosConsumidos);
+
+    Serial.println(" Litros");
+
+
+    // -------------------------------------------------
+    // VERIFICA SE A ÁGUA ESTÁ SENDO UTILIZADA
+    // -------------------------------------------------
+
+    if (pulsos > 0) {
+
+      Serial.println("Status: AGUA EM USO");
+
+    } else {
+
+      Serial.println("Status: AGUA PARADA");
+    }
+
+
+    // =================================================
+    // ENVIO PARA A API
+    // =================================================
+
+    // O ESP32 só envia se:
+    //
+    // 1. Existirem novos pulsos desde o último envio
+    // 2. Já tiverem passado 30 segundos
+    //
+    // Dessa forma, quando a água estiver parada,
+    // nenhum novo registro será enviado.
+
+    if (
+      pulsosDesdeUltimoEnvio > 0 &&
+      millis() - ultimoEnvio >= intervaloEnvio
+    ) {
+
+
+      // ------------------------------------------------
+      // VERIFICA CONEXÃO COM WI-FI
+      // ------------------------------------------------
+
+      if (WiFi.status() == WL_CONNECTED) {
+
+
+        Serial.println();
+
+        Serial.println("==============================");
+
+        Serial.println("ENVIANDO DADOS PARA A API");
+
+        Serial.println("==============================");
+
+
+        // ------------------------------------------------
+        // CRIA CONEXÃO HTTP
+        // ------------------------------------------------
+
+        HTTPClient http;
+
+        http.begin(servidor);
+
+
+        // Define que o conteúdo enviado será JSON
+        http.addHeader(
+          "Content-Type",
+          "application/json"
+        );
+
+
+        // ------------------------------------------------
+        // CRIA O JSON
+        // ------------------------------------------------
+
+        JsonDocument doc;
+
+
+        // Identificação do sensor
+        doc["sensor"] = "Splash";
+
+
+        // Pulsos acumulados desde que o ESP32 foi ligado
+        doc["pulsos"] = pulsosTotais;
+
+
+        // Vazão atual
+        doc["vazao"] = vazao;
+
+
+        // Consumo acumulado em litros
+        doc["consumo"] = litrosConsumidos;
+
+
+        // ------------------------------------------------
+        // CONVERTE JSON PARA TEXTO
+        // ------------------------------------------------
+
+        String json;
+
+        serializeJson(doc, json);
+
+
+        // ------------------------------------------------
+        // MOSTRA O JSON ENVIADO
+        // ------------------------------------------------
+
+        Serial.println("JSON enviado:");
+
+        Serial.println(json);
+
+
+        // ------------------------------------------------
+        // ENVIA PARA A API
+        // ------------------------------------------------
+
+        int codigoHTTP = http.POST(json);
+
+
+        Serial.print("Codigo HTTP: ");
+
+        Serial.println(codigoHTTP);
+
+
+        // =================================================
+        // VERIFICA RESPOSTA DA API
+        // =================================================
+
+        if (codigoHTTP > 0) {
+
+
+          // -----------------------------------------------
+          // PEGA A RESPOSTA DA API
+          // -----------------------------------------------
+
+          String resposta = http.getString();
+
+
+          Serial.println("Resposta da API:");
+
+          Serial.println(resposta);
+
+
+          // -----------------------------------------------
+          // ENVIO CONCLUÍDO
+          // -----------------------------------------------
+
+          Serial.println("Dados enviados com sucesso!");
+
+
+          // Zera os pulsos que já foram considerados
+          // neste envio.
+
+          pulsosDesdeUltimoEnvio = 0;
+
+
+          // Marca o momento do último envio
+
+          ultimoEnvio = millis();
+
+
+        } else {
+
+
+          // -----------------------------------------------
+          // ERRO NO ENVIO
+          // -----------------------------------------------
+
+          Serial.println(
+            "Erro ao enviar para a API."
+          );
+
+
+          Serial.println(
+            "Os pulsos continuam acumulados para uma "
+            "nova tentativa."
+          );
+        }
+
+
+        // Fecha a conexão HTTP
+
+        http.end();
+
+
+      } else {
+
+
+        // =================================================
+        // WI-FI DESCONECTADO
+        // =================================================
+
+        Serial.println();
+
+        Serial.println(
+          "WiFi desconectado. Dados nao enviados."
+        );
+
+        Serial.println(
+          "Os pulsos continuam acumulados."
+        );
+      }
+    }
+
+
+    // ---------------------------------------------------
+    // ATUALIZA O TEMPO DA ÚLTIMA LEITURA
+    // ---------------------------------------------------
+
+    ultimoTempo = millis();
+  }
+}

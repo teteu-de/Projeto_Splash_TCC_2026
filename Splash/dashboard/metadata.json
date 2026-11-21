@@ -1,0 +1,6 @@
+{
+  "name": "Splash",
+  "description": "Sistema Inteligente de Monitoramento de Consumo de Água Residencial com ESP32 e ZJ-S201",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

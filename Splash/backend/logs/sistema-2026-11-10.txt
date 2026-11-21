@@ -1,0 +1,2 @@
+[10/11/2026, 15:35:44] [INFO] [sistema] Servidor iniciado | {"porta":3000,"ambiente":"development"}
+[10/11/2026, 15:35:45] [INFO] [sistema] Conexão com PostgreSQL estabelecida | {"horarioBanco":"2026-11-10T18:35:45.718Z"}
